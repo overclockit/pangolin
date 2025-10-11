@@ -67,6 +67,10 @@ export async function traefikConfigProvider(
                         ).href,
                         userSessionCookieName:
                             config.getRawConfig().server.session_cookie_name,
+                        clouflareIps:
+                            config.getRawConfig().badger.cloudflare_ips,
+                        trustedIps:
+                            config.getRawConfig().badger.trusted_ips,
 
                         // deprecated
                         accessTokenQueryParam:
