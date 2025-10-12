@@ -488,7 +488,10 @@ export class TraefikConfigManager {
                             userSessionCookieName:
                                 config.getRawConfig().server
                                     .session_cookie_name,
-
+                            cloudflareIPs:
+                                config.getRawConfig().badger.cloudflare_ips,
+                            trustedIPs:
+                                config.getRawConfig().badger.trusted_ips,
                             // deprecated
                             accessTokenQueryParam:
                                 config.getRawConfig().server

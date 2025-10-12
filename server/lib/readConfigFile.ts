@@ -208,6 +208,12 @@ export const configSchema = z
             })
             .optional()
             .default({}),
+        badger: z.object({
+                cloudflare_ips: z.array(z.string()).optional().default([]),
+                trusted_ips: z.array(z.string()).optional().default([])
+            })
+            .optional()
+            .default({}),
         gerbil: z
             .object({
                 exit_node_name: z.string().optional(),

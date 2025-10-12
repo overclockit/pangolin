@@ -59,8 +59,6 @@ export async function exchangeSession(
             cleanHost = cleanHost.slice(0, -1*matched.length);
         }
 
-        const clientIp = requestIp?.split(":")[0];
-
         const [resource] = await db
             .select()
             .from(resources)
@@ -85,7 +83,7 @@ export async function exchangeSession(
         if (!requestSession) {
             if (config.getRawConfig().app.log_failed_attempts) {
                 logger.info(
-                    `Exchange token is invalid. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                    `Exchange token is invalid. Resource ID: ${resource.resourceId}. IP: ${requestIp}.`
                 );
             }
             return next(
@@ -96,7 +94,7 @@ export async function exchangeSession(
         if (!requestSession.isRequestToken) {
             if (config.getRawConfig().app.log_failed_attempts) {
                 logger.info(
-                    `Exchange token is invalid. Resource ID: ${resource.resourceId}. IP: ${clientIp}.`
+                    `Exchange token is invalid. Resource ID: ${resource.resourceId}. IP: ${requestIp}.`
                 );
             }
             return next(
