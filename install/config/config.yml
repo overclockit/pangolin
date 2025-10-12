@@ -1,6 +1,8 @@
 # To see all available options, please visit the docs:
 # https://docs.digpangolin.com/self-host/advanced/config-file 
-
+badger:
+    cloudflare_ips: []
+    trusted_ips: []
 gerbil:
     start_port: 51820
     base_endpoint: "{{.DashboardDomain}}"

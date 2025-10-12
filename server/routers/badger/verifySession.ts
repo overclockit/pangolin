@@ -97,28 +97,7 @@ export async function verifyResourceSession(
             query
         } = parsedBody.data;
 
-        const clientIp = requestIp
-            ? (() => {
-                  logger.debug("Request IP:", { requestIp });
-                  if (requestIp.startsWith("[") && requestIp.includes("]")) {
-                      // if brackets are found, extract the IPv6 address from between the brackets
-                      const ipv6Match = requestIp.match(/\[(.*?)\]/);
-                      if (ipv6Match) {
-                          return ipv6Match[1];
-                      }
-                  }
-
-                  // ivp4
-                  // split at last colon
-                  const lastColonIndex = requestIp.lastIndexOf(":");
-                  if (lastColonIndex !== -1) {
-                      return requestIp.substring(0, lastColonIndex);
-                  }
-                  return requestIp;
-              })()
-            : undefined;
-
-        logger.debug("Client IP:", { clientIp });
+        logger.debug("Client IP:", { requestIp });
 
         let cleanHost = host;
         // if the host ends with :port, strip it
@@ -166,7 +145,7 @@ export async function verifyResourceSession(
         if (resource.applyRules) {
             const action = await checkRules(
                 resource.resourceId,
-                clientIp,
+                requestIp,
                 path
             );
 
@@ -247,7 +226,7 @@ export async function verifyResourceSession(
                     logger.info(
                         `Resource access token is invalid. Resource ID: ${
                             resource.resourceId
-                        }. IP: ${clientIp}.`
+                        }. IP: ${requestIp}.`
                     );
                 }
             }
@@ -283,7 +262,7 @@ export async function verifyResourceSession(
                     logger.info(
                         `Resource access token is invalid. Resource ID: ${
                             resource.resourceId
-                        }. IP: ${clientIp}.`
+                        }. IP: ${requestIp}.`
                     );
                 }
             }
@@ -298,7 +277,7 @@ export async function verifyResourceSession(
                 logger.info(
                     `Missing resource sessions. Resource ID: ${
                         resource.resourceId
-                    }. IP: ${clientIp}.`
+                    }. IP: ${requestIp}.`
                 );
             }
             return notAllowed(res);
@@ -331,7 +310,7 @@ export async function verifyResourceSession(
                     logger.info(
                         `Resource session is an exchange token. Resource ID: ${
                             resource.resourceId
-                        }. IP: ${clientIp}.`
+                        }. IP: ${requestIp}.`
                     );
                 }
                 return notAllowed(res);
@@ -405,7 +384,7 @@ export async function verifyResourceSession(
             logger.info(
                 `Resource access not allowed. Resource ID: ${
                     resource.resourceId
-                }. IP: ${clientIp}.`
+                }. IP: ${requestIp}.`
             );
         }
         return notAllowed(res, redirectUrl);
@@ -582,7 +561,7 @@ async function isUserAllowedToAccessResource(
 
 async function checkRules(
     resourceId: number,
-    clientIp: string | undefined,
+    requestIp: string | undefined,
     path: string | undefined
 ): Promise<"ACCEPT" | "DROP" | "PASS" | undefined> {
     const ruleCacheKey = `rules:${resourceId}`;
@@ -608,12 +587,12 @@ async function checkRules(
         }
 
         if (
-            clientIp &&
+            requestIp &&
             rule.match == "CIDR" &&
-            isIpInCidr(clientIp, rule.value)
+            isIpInCidr(requestIp, rule.value)
         ) {
             return rule.action as any;
-        } else if (clientIp && rule.match == "IP" && clientIp == rule.value) {
+        } else if (requestIp && rule.match == "IP" && requestIp == rule.value) {
             return rule.action as any;
         } else if (
             path &&
@@ -622,9 +601,9 @@ async function checkRules(
         ) {
             return rule.action as any;
         } else if (
-            clientIp &&
+            requestIp &&
             rule.match == "GEOIP" &&
-            (await isIpInGeoIP(clientIp, rule.value))
+            (await isIpInGeoIP(requestIp, rule.value))
         ) {
             return rule.action as any;
         }
